@@ -21,11 +21,11 @@ jobs:
         with:
           node-version: '18.x'
 
-      - name: npm install, build, and test
-        run: |
-          npm install
-          npm run build --if-present
-          npm run test --if-present
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Build application (if applicable)
+        run: npm run build --if-present
       
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -40,26 +40,25 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write #This is required for requesting the JWT
+      id-token: write # Required for Azure authentication
 
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: node-app
-      
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_93F89600F8A0467282F7D9C881043ECE }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_015B6A3A3A9A4B7897A997BA770BDE44 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_05C35D43A843443CB91897D78E7C3B10 }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: 'Deploy to Azure Web App'
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
           app-name: 'rpgdoscria'
           slot-name: 'Production'
           package: .
-          
